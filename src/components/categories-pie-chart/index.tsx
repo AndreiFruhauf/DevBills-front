@@ -2,33 +2,9 @@ import { ResponsivePie } from '@nivo/pie'
 import { useMemo } from 'react'
 import { theme } from '../../styles/theme'
 import { formatCurrency } from '../../utils/format-currency'
+import { Expense } from '../../services/api-types'
 
-const apiData = [
-    {
-        _id: '1',
-        title: 'Alimentação',
-        amount: 90000,
-        color: theme.colors.primary
-    },
-    {
-        _id: '2',
-        title: 'Compras',
-        amount: 70800,
-        color: theme.colors.primaryDark
-    },
-    {
-        _id: '3',
-        title: 'Streaming',
-        amount: 10000,
-        color: theme.colors.info
-    },
-    {
-        _id: '4',
-        title: 'Restaurante',
-        amount: 10000,
-        color: theme.colors.black
-    }
-]
+
 
 type ChartData = {
     id: string,
@@ -38,22 +14,42 @@ type ChartData = {
     color: string
 }
 
-export function CategoriesPieChart() {
+export type CategoryProps = {
+    id: string;
+    title: string;
+    color: string
+}
+
+type CategoriesPieChartProps = {
+    onClick: (category: CategoryProps) => void
+    expenses?: Expense[]
+}
+
+export function CategoriesPieChart({ onClick, expenses }: CategoriesPieChartProps) {
 
     const data = useMemo<ChartData[]>(() => {
-        const chartData = apiData.map((item) => ({
-            id: item.title,
-            label: item.title,
-            externalId: item._id,
-            value: item.amount,
-            color: item.color
-        }))
+        if(expenses?.length) {
+            const chartData = expenses?.map((item) => ({
+                id: item.title,
+                label: item.title,
+                externalId: item._id,
+                value: item.amount,
+                color: item.color
+            }))
 
-        return chartData
-    }, [])
+            return chartData
+        }
+
+        return []
+    }, [expenses])
     
     return (
         <ResponsivePie 
+        onClick={({data}) => onClick({
+            id: data.externalId,
+            title: data.id,
+            color: data.color
+        })}
         data={data} 
         enableArcLabels={false}
         enableArcLinkLabels={false}
